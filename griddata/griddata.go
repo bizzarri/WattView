@@ -54,9 +54,9 @@ func main() {
 	// debug - debug flag
 	//
         version := 0.0
-	var loc string 
+	var location string 
 	boolPtr := flag.Bool("debug", false, "Debug flag")
-	flag.StringVar(&loc, "l", "CAISO_ZP26", "Balancing Authority abreviation")
+	flag.StringVar(&location, "l", "CAISO_ZP26", "Balancing Authority abreviation")
 	flag.Parse()
 	debug := *boolPtr
 	if debug {
@@ -65,7 +65,7 @@ func main() {
 	}
 
 
-     location := "CAISO_ZP26"
+
      fmt.Printf("Grid Data for Balancing Authority  %s\n",location)
      client := &http.Client{}
      req,err := http.NewRequest("GET","https://api2.watttime.org/v2/login",nil)
@@ -89,7 +89,7 @@ func main() {
 	gridstr = gridstr + location
 	gridstr = gridstr + "&latitude=&longitude=&starttime=2019-01-05T09:00:00-00:00&endtime=2019-01-05T09:05:00-00:00"
 	req,err = http.NewRequest("GET",gridstr,nil)
-
+	Check(err,"Error getting request")
      bearer := "Bearer " + wtoken["token"].(string)
      req.Header.Add("Authorization",bearer)
      resp, err = client.Do(req)
