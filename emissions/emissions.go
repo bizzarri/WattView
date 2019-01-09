@@ -1,3 +1,19 @@
+//******************************************************
+//* emissions - read the emissions information from the watttime.org API
+//*
+//* Written by Maurice Bizzarri, January, 2019
+//*
+//* Version 0.0 - initial functionaility
+//*
+//* takes two arguments on command line:
+//* -debug  displays debug information
+//* -l location uses that location to get info
+//* defaults to CAISO_ZP26
+//* see watttime.org for an interactive map to figure out
+//* your grid designation
+//*
+//*****************************************************
+
 package main
 
 import "fmt"
@@ -92,6 +108,14 @@ func main() {
      err = json.Unmarshal(response,&emisres)
 	Check (err,"Error unmarshalling response")
 	fmt.Printf("\nReport for area: %s\n",emisres.Barea)
-	fmt.Printf("switch(1=yes, 0=no): %s\n",emisres.Green)	
+        if emisres.Green == "0" {
+		fmt.Printf("Don't switch (not green)\n")
+	} else {
+		fmt.Printf("Switch! (green grid)\n")
+	}
+       
+        timed, err := time.Parse(time.RFC3339,emisres.Validuntil)
+	Check(err,"Error parsing Valid Until time")
+	fmt.Printf("\nValid Until: %02d:%02d:%02d\n",timed.Hour(),timed.Minute(),timed.Second())
      
 }
