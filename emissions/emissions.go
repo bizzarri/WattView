@@ -53,15 +53,18 @@ func Check(val error, explain string)  {
 func main() {
 	//
 	// check for debug option
+	// check for balancing authority parameter
+	//
+	// version number for program
 	//
 	version := 0.0
-
 	//
-	// example parameter - use your own
+	// loc - balancing authority
+	// debug - debug flag
 	//
 	var loc string 
 	boolPtr := flag.Bool("debug", false, "Debug flag")
-	flag.StringVar(&loc, "l", "CAISO_ZP26", "ISO Location abreviation")
+	flag.StringVar(&loc, "l", "CAISO_ZP26", "Balancing Authority")
 	flag.Parse()
 	debug := *boolPtr
 	if debug {
@@ -69,7 +72,7 @@ func main() {
 		fmt.Printf("Version: %1.2f\n", version)
 	}
 
-     fmt.Printf("WattTime Emissions Real Time Display for: %s\n",loc)
+     fmt.Printf("WattTime Emissions Real Time Analysis\n")
      timeout := time.Duration(5 * time.Second)
      client := &http.Client{
      	    Timeout: timeout,
@@ -107,7 +110,7 @@ func main() {
 	var emisres Response
      err = json.Unmarshal(response,&emisres)
 	Check (err,"Error unmarshalling response")
-	fmt.Printf("\nReport for area: %s\n",emisres.Barea)
+	fmt.Printf("\nReport for balancing authority: %s\n",emisres.Barea)
         if emisres.Green == "0" {
 		fmt.Printf("Don't switch (not green)\n")
 	} else {
@@ -116,6 +119,7 @@ func main() {
        
         timed, err := time.Parse(time.RFC3339,emisres.Validuntil)
 	Check(err,"Error parsing Valid Until time")
-	fmt.Printf("\nValid Until: %02d:%02d:%02d\n",timed.Hour(),timed.Minute(),timed.Second())
-     
+	fmt.Printf("Valid Until: %02d:%02d:%02d UT\n",timed.Hour(),timed.Minute(),timed.Second())
+	fmt.Printf("Rating (0=Extremely Clean, 5=Harmful): %s\n",emisres.Rating)
+        fmt.Printf("Percent Dirty (0-100): %s\n",emisres.Percent)
 }

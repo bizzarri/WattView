@@ -1,9 +1,26 @@
+//******************************************************
+//* emissions - read the emissions information from the watttime.org API
+//*
+//* Written by Maurice Bizzarri, January, 2019
+//*
+//* Version 0.0 - initial functionaility
+//*
+//* takes two arguments on command line:
+//* -debug  displays debug information
+//* -l location uses that location to get info
+//* defaults to CAISO_ZP26
+//* see watttime.org for an interactive map to figure out
+//* your grid designation
+//*
+//*****************************************************
+
+
 package main
 
 import "fmt"
 import "net/http"
 import "io/ioutil"
-//import "net/url"
+import "flag"
 import "os"
 //import "strings"
 import "encoding/json"
@@ -31,9 +48,25 @@ func Check(err error, msg string)  {
      }
 }
 func main() {
-     debug := false
+
+	//
+	// location - balancing authority for parameter
+	// debug - debug flag
+	//
+        version := 0.0
+	var loc string 
+	boolPtr := flag.Bool("debug", false, "Debug flag")
+	flag.StringVar(&loc, "l", "CAISO_ZP26", "Balancing Authority abreviation")
+	flag.Parse()
+	debug := *boolPtr
+	if debug {
+		fmt.Printf("Debug flag true - in debug mode.\n")
+		fmt.Printf("Version: %1.2f\n", version)
+	}
+
+
      location := "CAISO_ZP26"
-     fmt.Printf("Grid Data for WattTime Zone %s\n",location)
+     fmt.Printf("Grid Data for Balancing Authority  %s\n",location)
      client := &http.Client{}
      req,err := http.NewRequest("GET","https://api2.watttime.org/v2/login",nil)
      req.SetBasicAuth("bizzarri","Idontlike2018")
@@ -73,13 +106,13 @@ func main() {
 //
 //        for idx := 0; idx < 5; idx++ {
         for idx := range unwrap {
-	fmt.Printf("Zone: %s\n",unwrap[idx].Ba)
-	fmt.Printf("Type: %s\n",unwrap[idx].Dtype)
-	fmt.Printf("Point Time: %s\n",unwrap[idx].Point_time)
-	fmt.Printf("Frequency: %f\n",unwrap[idx].Frequency)
+	fmt.Printf("Balancing Authority: %s\n",unwrap[idx].Ba)
+	fmt.Printf("Data Type: %s\n",unwrap[idx].Dtype)
+	fmt.Printf("Time Stamp: %s\n",unwrap[idx].Point_time)
+	fmt.Printf("Frequency: %f seconds\n",unwrap[idx].Frequency)
 	fmt.Printf("Value: %f\n",unwrap[idx].Val)
-	fmt.Printf("Market: %s\n",unwrap[idx].Market)
-	fmt.Printf("Fuel: %s\n",unwrap[idx].Fuel)
+	fmt.Printf("Electricity Grid Region Market: %s\n",unwrap[idx].Market)
+	fmt.Printf("Type of Fuel: %s\n",unwrap[idx].Fuel)
 	}		
 
 		
