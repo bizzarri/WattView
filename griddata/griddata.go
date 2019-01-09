@@ -19,7 +19,8 @@ type Datadef struct {
 	Point_time string `json:"point_time"`
 	Frequency float64 `json:"frequency"`
 	Market string `json:"market"`
-	Val float64 `json"value"`
+	Val float64 `json:"value"`
+	Fuel string `json:"fuel"`
 }
 	
 
@@ -31,7 +32,8 @@ func Check(err error, msg string)  {
 }
 func main() {
      debug := false
-     fmt.Printf("WattTime\n")
+     location := "CAISO_ZP26"
+     fmt.Printf("Grid Data for WattTime Zone %s\n",location)
      client := &http.Client{}
      req,err := http.NewRequest("GET","https://api2.watttime.org/v2/login",nil)
      req.SetBasicAuth("bizzarri","Idontlike2018")
@@ -50,7 +52,10 @@ func main() {
 	     fmt.Printf("token: %s\n",wtoken["token"])
      }
 
-     req,err = http.NewRequest("GET","https://api2.watttime.org/v2/data/?ba=CAISO_ZP26&latitude=&longitude=&starttime=2019-01-05T09:00:00-00:00&endtime=2019-01-05T09:05:00-00:00",nil)
+	gridstr := "https://api2.watttime.org/v2/data/?ba="
+	gridstr = gridstr + location
+	gridstr = gridstr + "&latitude=&longitude=&starttime=2019-01-05T09:00:00-00:00&endtime=2019-01-05T09:05:00-00:00"
+	req,err = http.NewRequest("GET",gridstr,nil)
 
      bearer := "Bearer " + wtoken["token"].(string)
      req.Header.Add("Authorization",bearer)
@@ -62,17 +67,21 @@ func main() {
 	     fmt.Printf("Response: %s\n",response)
      }
 
-
-	var unwrap []interface{}
+        var unwrap []Datadef
 	err = json.Unmarshal(response,&unwrap)
         Check(err,"Error unmarshalling response")
 //
-	fmt.Printf("data: %s\n",unwrap[0])
-        var datawrap Datadef
-//
+//        for idx := 0; idx < 5; idx++ {
+        for idx := range unwrap {
+	fmt.Printf("Zone: %s\n",unwrap[idx].Ba)
+	fmt.Printf("Type: %s\n",unwrap[idx].Dtype)
+	fmt.Printf("Point Time: %s\n",unwrap[idx].Point_time)
+	fmt.Printf("Frequency: %f\n",unwrap[idx].Frequency)
+	fmt.Printf("Value: %f\n",unwrap[idx].Val)
+	fmt.Printf("Market: %s\n",unwrap[idx].Market)
+	fmt.Printf("Fuel: %s\n",unwrap[idx].Fuel)
+	}		
 
-	datawrap = unwrap[0].(Datadef)
-	fmt.Printf("point_time: %s\n",datawrap.Point_time)
 		
 
 }
