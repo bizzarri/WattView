@@ -1,5 +1,5 @@
 //******************************************************
-//* emissions - read the emissions information from the watttime.org API
+//* griddata - read detailed grid data on a balancing authority
 //*
 //* Written by Maurice Bizzarri, January, 2019
 //*
@@ -29,6 +29,13 @@ type Wtoken struct {
      token string `json:"token"`
 
      }
+	
+type MakeAcct struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+	Org      string `json:"org"`
+}
 
 type Datadef struct {
 	Ba string `json:"ba"`
@@ -64,12 +71,29 @@ func main() {
 		fmt.Printf("Version: %1.2f\n", version)
 	}
 
+	//
+	// get account and password from $HOME/.WattTime/account
+	// should be set by makeacct
+	//
+	homedir := os.Getenv("HOME")
+	acctfile := homedir + "/.WattTime/account"
+	accts, err := ioutil.ReadFile(acctfile)
+	Check(err,"Accounts file not found or other read error")
+	var macct MakeAcct
+	err = json.Unmarshal(accts,&macct)
+	Check(err,"Error unmarshalling accounts files")
+	account := macct.Username
+	password := macct.Password
+        if debug {
+		fmt.Printf("Account Name: %s\n",account)
+		fmt.Printf("Password: %s\n",password)
+	}
 
 
      fmt.Printf("Grid Data for Balancing Authority  %s\n",location)
      client := &http.Client{}
      req,err := http.NewRequest("GET","https://api2.watttime.org/v2/login",nil)
-     req.SetBasicAuth("bizzarri","Idontlike2018")
+	req.SetBasicAuth(account,password)
      resp, err := client.Do(req)
 	Check(err,"Error WattTime login request")
      defer resp.Body.Close()

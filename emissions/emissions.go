@@ -16,20 +16,27 @@
 
 package main
 
-import "fmt"
-import "net/http"
-import "io/ioutil"
-//import "net/url"
-import "os"
-//import "strings"
-import "encoding/json"
-import "time"
-import "flag"
+import (
+	"fmt"
+	"net/http"
+	"io/ioutil"
+	"os"
+	"encoding/json"
+	"time"
+	"flag"
+)
 
 
 type Wtoken struct {
      token string `json:"token"`
 
+}
+	
+type MakeAcct struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+	Org      string `json:"org"`
 }
 
 type Response struct {
@@ -71,14 +78,30 @@ func main() {
 		fmt.Printf("Debug flag true - in debug mode.\n")
 		fmt.Printf("Version: %1.2f\n", version)
 	}
-
+	//
+	// get account and password from $HOME/.WattTime/account
+	// should be set by makeacct
+	//
+	homedir := os.Getenv("HOME")
+	acctfile := homedir + "/.WattTime/account"
+	accts, err := ioutil.ReadFile(acctfile)
+	Check(err,"Accounts file not found or other read error")
+	var macct MakeAcct
+	err = json.Unmarshal(accts,&macct)
+	Check(err,"Error unmarshalling accounts files")
+	account := macct.Username
+	password := macct.Password
+        if debug {
+		fmt.Printf("Account Name: %s\n",account)
+		fmt.Printf("Password: %s\n",password)
+	}
      fmt.Printf("WattTime Emissions Real Time Analysis\n")
      timeout := time.Duration(5 * time.Second)
      client := &http.Client{
      	    Timeout: timeout,
 	    }
      req,err := http.NewRequest("GET","https://api2.watttime.org/v2/login",nil)
-     req.SetBasicAuth("bizzarri","Idontlike2018")
+     req.SetBasicAuth(account,password)
      resp, err := client.Do(req)
 	Check (err,"Error login request call")
 

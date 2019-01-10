@@ -60,8 +60,8 @@ type MakeAcct struct {
 	Password string `json:"password"`
 	Email    string `json:"email"`
 	Org      string `json:"org"`
-	
 }
+
 func Check(val error, explain string)  {
 	if val != nil {
 		fmt.Printf("Error: %s\n%v\n",explain,val)
@@ -162,7 +162,7 @@ func main() {
 
         fmt.Printf("confirmation: %s\n",respdata.Ok)
      	fmt.Printf("confirm account: %s\n",respdata.User)
-        err = ioutil.WriteFile(acctfile, reqbytes.Bytes(),0755)
+        err = ioutil.WriteFile(acctfile, reqbytes.Bytes(),0644)
         Check (err, "Error writing account file")
 
 
