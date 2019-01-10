@@ -5,12 +5,12 @@
 //*
 //* Version 0.0 - initial functionaility
 //*
-//* takes two arguments on command line:
+//* takes two arguments (one is optional) on command line:
 //* -debug  displays debug information
 //* -l location uses that location to get info
 //* defaults to CAISO_ZP26
 //* see watttime.org for an interactive map to figure out
-//* your grid designation
+//* your grid designation or use gridregion
 //*
 //*****************************************************
 
@@ -96,6 +96,9 @@ func main() {
 		fmt.Printf("Password: %s\n",password)
 	}
      fmt.Printf("WattTime Emissions Real Time Analysis\n")
+	//
+	// had to increase time out
+	//
      timeout := time.Duration(5 * time.Second)
      client := &http.Client{
      	    Timeout: timeout,
@@ -129,7 +132,7 @@ func main() {
      if debug {
 	     fmt.Printf("Response: %s\n",response)
      }
-//	var emisres map[string]interface{}
+
 	var emisres Response
      err = json.Unmarshal(response,&emisres)
 	Check (err,"Error unmarshalling response")

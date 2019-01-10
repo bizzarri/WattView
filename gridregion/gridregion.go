@@ -6,14 +6,16 @@
 //*
 //* Version 0.0 - initial functionaility
 //*
-//* takes three (optional) arguments on command line:
+//* takes three (one optional) arguments on command line:
 //* -debug  displays debug information
 //* -lat latitude
 //* -long longitude to use
-//* defaults to lat=42.372 and long=-72.519
+
+//* defaults to lat=42.372 and long=-72.519 (examples on WattTime
+//* web site)
 //*
 //* see watttime.org for an interactive map to figure out
-//* your grid designation
+//* your grid designation interactively
 //*
 //*****************************************************
 
