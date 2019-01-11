@@ -8,9 +8,13 @@
 //* takes two arguments (one is optional) on command line:
 //* -debug  displays debug information
 //* -l location uses that location to get info
-//* defaults to CAISO_ZP26
+//* also reads $HOME/.WattTime/ba file and uses that for
+//* the balancing authority if nothing on command line
+//* defaults to CAISO_ZP26 if nothing supplied or in ba file
+//*
 //* see watttime.org for an interactive map to figure out
-//* your grid designation or use gridregion
+//* your grid designation or use gridregion which creates
+//* and rewrites $HOME/.WattTime/ba file
 //*
 //*****************************************************
 
@@ -71,7 +75,7 @@ func main() {
 	//
 	var loc string 
 	boolPtr := flag.Bool("debug", false, "Debug flag")
-	flag.StringVar(&loc, "l", "CAISO_ZP26", "Balancing Authority")
+	flag.StringVar(&loc, "l", "nothing", "Balancing Authority")
 	flag.Parse()
 	debug := *boolPtr
 	if debug {
@@ -82,8 +86,32 @@ func main() {
 	// get account and password from $HOME/.WattTime/account
 	// should be set by makeacct
 	//
+        defaultloc := "CAISO_ZP26"
 	homedir := os.Getenv("HOME")
 	acctfile := homedir + "/.WattTime/account"
+        bafile := homedir + "/.WattTime/ba"
+	//
+	// see if ba file created
+	// command line takes precedent.
+	// if loc is not "nothing" then check file
+	// if file isn't there then default to defaultloc
+	//
+        var locate string
+        if loc != "nothing" {
+		locate = loc
+	} else {
+	blocate,err := ioutil.ReadFile(bafile)
+
+	if err == nil {
+		locate = string(blocate)
+	} else {
+        	locate = defaultloc
+
+	}
+	}
+        if debug {
+		fmt.Printf("locate: %s\n",locate)
+	}
 	accts, err := ioutil.ReadFile(acctfile)
 	Check(err,"Accounts file not found or other read error")
 	var macct MakeAcct
@@ -119,7 +147,7 @@ func main() {
      if debug {
 	fmt.Printf("token: %s\n",wtoken["token"])
 	}
-     request := "https://api2.watttime.org/v2/index/?ba="+loc+"&latitude=&longitude=&style=all"
+     request := "https://api2.watttime.org/v2/index/?ba="+locate+"&latitude=&longitude=&style=all"
      req,err = http.NewRequest("GET",request,nil)
 	Check (err,"Error creating NewRequest")
      bearer := "Bearer " + wtoken["token"].(string)

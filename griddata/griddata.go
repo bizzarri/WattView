@@ -9,6 +9,8 @@
 //* -debug  displays debug information
 //* -l location uses that location to get info
 //* defaults to CAISO_ZP26
+//* if $HOME/.WattTime/ba there uses the file unless
+//* overridden on command line with -l
 //* see watttime.org for an interactive map to figure out
 //* your grid designation
 //*
@@ -60,10 +62,15 @@ func main() {
 	// location - balancing authority for parameter
 	// debug - debug flag
 	//
+	defaultloc := "CAISO_ZP26"
         version := 0.0
 	var location string 
+        var starttime string
+	var endtime string
 	boolPtr := flag.Bool("debug", false, "Debug flag")
-	flag.StringVar(&location, "l", "CAISO_ZP26", "Balancing Authority abreviation")
+	flag.StringVar(&location, "l", "nothing", "Balancing Authority abbrev.")
+	flag.StringVar(&starttime, "s", "2019-01-02T00:00:00", "Start Time (RFC3339 format")
+	flag.StringVar(&endtime, "e", "2019-01-02T00:00:05", "End Time (RFC3339 format)")
 	flag.Parse()
 	debug := *boolPtr
 	if debug {
@@ -77,6 +84,8 @@ func main() {
 	//
 	homedir := os.Getenv("HOME")
 	acctfile := homedir + "/.WattTime/account"
+        bafile := homedir + "/.WattTime/ba"
+	
 	accts, err := ioutil.ReadFile(acctfile)
 	Check(err,"Accounts file not found or other read error")
 	var macct MakeAcct
@@ -90,7 +99,7 @@ func main() {
 	}
 
 
-     fmt.Printf("Grid Data for Balancing Authority  %s\n",location)
+
      client := &http.Client{}
      req,err := http.NewRequest("GET","https://api2.watttime.org/v2/login",nil)
 	req.SetBasicAuth(account,password)
@@ -108,10 +117,38 @@ func main() {
      if debug {
 	     fmt.Printf("token: %s\n",wtoken["token"])
      }
+	//
+	// see if ba file created
+	// command line takes precedent.
+	// if loc is not "nothing" then check file
+	// if file isn't there then default to defaultloc
+	//
+        var locate string
+        if location != "nothing" {
+		locate = location
+	} else {
+	blocate,err := ioutil.ReadFile(bafile)
 
+	if err == nil {
+		locate = string(blocate)
+	} else {
+        	locate = defaultloc
+
+	}
+	}
+        if debug {
+		fmt.Printf("locate: %s\n",locate)
+	}
+
+        fmt.Printf("Grid Data for Balancing Authority  %s\n",locate)
 	gridstr := "https://api2.watttime.org/v2/data/?ba="
-	gridstr = gridstr + location
-	gridstr = gridstr + "&latitude=&longitude=&starttime=2019-01-05T09:00:00-00:00&endtime=2019-01-05T09:05:00-00:00"
+	gridstr = gridstr + locate
+	gridstr = gridstr + "&latitude=&longitude=&starttime="
+	gridstr = gridstr + starttime
+	gridstr = gridstr +"&endtime=" + endtime
+	if debug {
+		fmt.Printf("getstring: %s\n",gridstr)
+	}
 	req,err = http.NewRequest("GET",gridstr,nil)
 	Check(err,"Error getting request")
      bearer := "Bearer " + wtoken["token"].(string)
