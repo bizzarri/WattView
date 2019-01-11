@@ -82,6 +82,7 @@ func main() {
 	//
 	homedir := os.Getenv("HOME")
 	acctfile := homedir + "/.WattTime/account"
+        bafile := homedir + "/.WattTime/ba"
 	accts, err := ioutil.ReadFile(acctfile)
 	Check(err,"Accounts file not found or other read error")
 	var macct MakeAcct
@@ -138,10 +139,15 @@ func main() {
 	err = json.Unmarshal(response,&unwrap)
         Check(err,"Error unmarshalling response")
 //
-	fmt.Printf("Abbreviation: %s\n",unwrap.Abbrev)
+	fmt.Printf("Abbreviation for Balancing Authority: %s\n",unwrap.Abbrev)
 	fmt.Printf("ID: %d\n",unwrap.Id)
 	fmt.Printf("Name: %s\n",unwrap.Name)
-
+	//
+	// write into $HOME/.WattTime/ba
+	//
+	err = ioutil.WriteFile(bafile, []byte(unwrap.Abbrev),0644)
+	Check (err,"Error writing BA abbreviation file")
+	
 
 		
 
