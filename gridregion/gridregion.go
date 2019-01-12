@@ -63,6 +63,10 @@ func main() {
 	var lat float64
 	var long float64
 	boolPtr := flag.Bool("debug", false, "Debug flag")
+        var account string
+	var password string
+        flag.StringVar(&account, "a","nothing","Account Name")
+	flag.StringVar(&password,"p","nothing","Account Password")
 
 	flag.Float64Var(&lat, "lat", 42.372, "Latitude to use")
 	flag.Float64Var(&long, "long", -72.519, "Longitude to use")
@@ -72,21 +76,27 @@ func main() {
 		fmt.Printf("Debug flag true - in debug mode.\n")
 		fmt.Printf("Version: %1.2f\n", version)
 	}
+	//*
+	//* locations of files
+	//*
+	homedir := os.Getenv("HOME")
+	acctfile := homedir + "/.WattTime/account"
+	bafile := homedir + "/.WattTime/ba"
 
 	//
 	// get account and password from $HOME/.WattTime/account
 	// should be set by makeacct
 	//
-	homedir := os.Getenv("HOME")
-	acctfile := homedir + "/.WattTime/account"
-	bafile := homedir + "/.WattTime/ba"
-	accts, err := ioutil.ReadFile(acctfile)
-	Check(err, "Accounts file not found or other read error")
-	var macct MakeAcct
-	err = json.Unmarshal(accts, &macct)
-	Check(err, "Error unmarshalling accounts files")
-	account := macct.Username
-	password := macct.Password
+        if account == "nothing" {
+		accts, err := ioutil.ReadFile(acctfile)
+		Check(err, "Accounts file not found or other read error")
+		var macct MakeAcct
+		err = json.Unmarshal(accts, &macct)
+		Check(err, "Error unmarshalling accounts files")
+		account = macct.Username
+		password = macct.Password
+	}
+	
 	if debug {
 		fmt.Printf("Account Name: %s\n", account)
 		fmt.Printf("Password: %s\n", password)
@@ -99,6 +109,12 @@ func main() {
 	resp, err := client.Do(req)
 	Check(err, "Error WattTime login request")
 	defer resp.Body.Close()
+        if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
+		fmt.Printf("Status Error: %s\n",resp.Status)
+		os.Exit(-1)
+	}
+
 	bodyText, err := ioutil.ReadAll(resp.Body)
 	Check(err, "Error reading body")
 	if debug {
@@ -124,6 +140,13 @@ func main() {
 	bearer := "Bearer " + wtoken["token"].(string)
 	req.Header.Add("Authorization", bearer)
 	resp, err = client.Do(req)
+	defer resp.Body.Close()
+        if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
+		fmt.Printf("Status Error: %s\n",resp.Status)
+		os.Exit(-1)
+	}
+
 	Check(err, "Error retrieving data")
 	response, err := ioutil.ReadAll(resp.Body)
 	Check(err, "Error reading data from GET")

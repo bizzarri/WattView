@@ -68,7 +68,14 @@ func main() {
 	req, err := http.NewRequest("GET", request, nil)
 	Check(err, "Error creating NewRequest")
 	resp, err := client.Do(req)
+        defer resp.Body.Close()
 	Check(err, "Error GET Request")
+        if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
+		fmt.Printf("Status Error: %s\n",resp.Status)
+		os.Exit(-1)
+	}
+
 	response, err := ioutil.ReadAll(resp.Body)
 	Check(err, "Error reading response")
 	if debug {

@@ -5,14 +5,18 @@
 //*
 //* Version 0.0 - initial functionaility
 //*
-//* takes two arguments on command line:
+//* takes two to 4 arguments on command line:
 //* -debug  displays debug information
 //* -l location uses that location to get info
+//* -a account to use
+//* -p password for account
 //* defaults to CAISO_ZP26
+//* uses $HOME/.WattTime/account if account not specified
+//*
 //* if $HOME/.WattTime/ba there uses the file unless
 //* overridden on command line with -l
 //* see watttime.org for an interactive map to figure out
-//* your grid designation
+//* your grid designation or use gridregion with lat/long
 //*
 //*****************************************************
 
@@ -65,10 +69,15 @@ func main() {
 	var location string
 	var starttime string
 	var endtime string
+        var account string
+	var password string
 	boolPtr := flag.Bool("debug", false, "Debug flag")
 	flag.StringVar(&location, "l", "nothing", "Balancing Authority abbrev.")
 	flag.StringVar(&starttime, "s", "2019-01-02T00:00:00", "Start Time (RFC3339 format")
 	flag.StringVar(&endtime, "e", "2019-01-02T00:00:05", "End Time (RFC3339 format)")
+        flag.StringVar(&account,"a","nothing","Account Name")
+	flag.StringVar(&password,"p","nothing","Account password")
+
 	flag.Parse()
 	debug := *boolPtr
 	if debug {
@@ -83,14 +92,16 @@ func main() {
 	homedir := os.Getenv("HOME")
 	acctfile := homedir + "/.WattTime/account"
 	bafile := homedir + "/.WattTime/ba"
-
-	accts, err := ioutil.ReadFile(acctfile)
-	Check(err, "Accounts file not found or other read error")
-	var macct MakeAcct
-	err = json.Unmarshal(accts, &macct)
-	Check(err, "Error unmarshalling accounts files")
-	account := macct.Username
-	password := macct.Password
+	if account == "nothing" {
+		accts, err := ioutil.ReadFile(acctfile)
+		Check(err, "Accounts file not found or other read error")
+		var macct MakeAcct
+		err = json.Unmarshal(accts, &macct)
+		Check(err, "Error unmarshalling accounts files")
+		account = macct.Username
+		password = macct.Password
+	}
+	
 	if debug {
 		fmt.Printf("Account Name: %s\n", account)
 		fmt.Printf("Password: %s\n", password)
@@ -102,6 +113,12 @@ func main() {
 	resp, err := client.Do(req)
 	Check(err, "Error WattTime login request")
 	defer resp.Body.Close()
+        if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
+		fmt.Printf("Status Error: %s\n",resp.Status)
+		os.Exit(-1)
+	}
+
 	bodyText, err := ioutil.ReadAll(resp.Body)
 	Check(err, "Error reading body")
 	if debug {
@@ -147,10 +164,16 @@ func main() {
 	}
 	req, err = http.NewRequest("GET", gridstr, nil)
 	Check(err, "Error getting request")
+	defer resp.Body.Close()
 	bearer := "Bearer " + wtoken["token"].(string)
 	req.Header.Add("Authorization", bearer)
 	resp, err = client.Do(req)
 	Check(err, "Error retrieving data")
+        if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
+		fmt.Printf("Status Error: %s\n",resp.Status)
+		os.Exit(-1)
+	}
 	response, err := ioutil.ReadAll(resp.Body)
 	Check(err, "Error reading data from GET")
 	if debug {

@@ -72,8 +72,13 @@ func main() {
 	// debug - debug flag
 	//
 	var loc string
+        var account string
+	var password string
 	boolPtr := flag.Bool("debug", false, "Debug flag")
 	flag.StringVar(&loc, "l", "nothing", "Balancing Authority")
+	flag.StringVar(&account, "a", "nothing", "Account to use")
+	flag.StringVar(&password, "p", "nothing", "Account Password")
+	
 	flag.Parse()
 	debug := *boolPtr
 	if debug {
@@ -110,13 +115,20 @@ func main() {
 	if debug {
 		fmt.Printf("locate: %s\n", locate)
 	}
-	accts, err := ioutil.ReadFile(acctfile)
-	Check(err, "Accounts file not found or other read error")
-	var macct MakeAcct
-	err = json.Unmarshal(accts, &macct)
-	Check(err, "Error unmarshalling accounts files")
-	account := macct.Username
-	password := macct.Password
+	//*
+	//* if account not specified in command line, look in
+	//* account file in $HOME/.WattTime/account
+	//*
+        if account == "nothing" {
+		accts, err := ioutil.ReadFile(acctfile)
+		Check(err, "Accounts file not found or other read error")
+		var macct MakeAcct
+		err = json.Unmarshal(accts, &macct)
+		Check(err, "Error unmarshalling accounts files")
+		account = macct.Username
+		password = macct.Password
+	}
+
 	if debug {
 		fmt.Printf("Account Name: %s\n", account)
 		fmt.Printf("Password: %s\n", password)
@@ -135,6 +147,12 @@ func main() {
 	Check(err, "Error login request call")
 
 	defer resp.Body.Close()
+        if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
+		fmt.Printf("Status Error: %s\n",resp.Status)
+		os.Exit(-1)
+	}
+
 	bodyText, err := ioutil.ReadAll(resp.Body)
 	if debug {
 		fmt.Printf("body: %s\n", bodyText)
@@ -155,6 +173,11 @@ func main() {
 	req.Header.Add("Authorization", bearer)
 	resp, err = client.Do(req)
 	Check(err, "Error getting NewRequest")
+        if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
+		fmt.Printf("Status Error: %s\n",resp.Status)
+		os.Exit(-1)
+	}
 
 	response, err := ioutil.ReadAll(resp.Body)
 	Check(err, "Error reading response")
