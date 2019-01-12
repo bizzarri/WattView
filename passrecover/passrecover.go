@@ -1,6 +1,6 @@
 //******************************************************
 //* passrecover - recover from a forgotten password
-//* this depends on a good email being supplied when
+//* this depends on a valid email address being supplied when
 //* account was created
 //*
 //* Written by Maurice Bizzarri, January, 2019
@@ -57,6 +57,10 @@ func main() {
 		fmt.Printf("Version: %1.2f\n", version)
 	}
 
+        if account == "default" {
+		fmt.Printf("Please specify account to recover using -a\n")
+		os.Exit(-1)
+	}
 	fmt.Printf("Recover password for account: %s\n", account)
 	client := &http.Client{}
 	request := "https://api2.watttime.org/v2/password/?username="
@@ -72,6 +76,7 @@ func main() {
 	}
 	var answer map[string]interface{}
 	err = json.Unmarshal(response, &answer)
-	fmt.Printf("%s\n", answer["ok"])
+	fmt.Printf("\n%s\n", answer["ok"])
+	fmt.Printf("Use the link in the email to reset your password.\n\n")
 
 }

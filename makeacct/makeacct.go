@@ -7,10 +7,11 @@
 //*
 //* takes two (or three) arguments on command line:
 //* -debug  displays debug information
-//* -account account name to create
-//* -password if you don't specify password, a random 14 digit password witll
+//* -account (-a) account name to create
+//* -password (-p) if you don't specify one, a random 14 digit password witll
 //* be created for you.
-//* This software stores the account and password in a text file
+//* -org (-o)
+//* This software stores the account, password, email and org in a file
 //* in ~/home/.watttime/account which is used by the rest of the system
 //*
 //*
@@ -35,7 +36,11 @@ func init() {
 }
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!"
-
+//*
+//* simple random string creator stolen from
+//* somewhere on the internet
+//* I did add numbers to the string and the exclam to make it 64 chars long
+//*
 func RandStringBytesRmndr(n int) string {
 	b := make([]byte, n)
 	for i := range b {
@@ -59,6 +64,10 @@ type MakeAcct struct {
 	Email    string `json:"email"`
 	Org      string `json:"org"`
 }
+
+//*
+//* standard err check function
+//*
 
 func Check(val error, explain string) {
 	if val != nil {
@@ -100,7 +109,7 @@ func main() {
 	var org string
 	boolPtr := flag.Bool("debug", false, "Debug flag")
 	flag.StringVar(&account, "a", "default", "Account name to create")
-	flag.StringVar(&password, "p", "", "Password to use")
+	flag.StringVar(&password, "p", "", "Password to use or one will be made for you")
 	flag.StringVar(&email, "e", "", "Email to use")
 	flag.StringVar(&org, "o", "", "(optional) organization name")
 
@@ -111,6 +120,10 @@ func main() {
 		fmt.Printf("Version: %1.2f\n", version)
 	}
 
+        if account == "default" {
+		fmt.Printf("Please specify account and email - see -h for help\n")
+		os.Exit(-1)
+	}
 	fmt.Printf("WattTime Account Creation - create account: %s\n", account)
 	if password == "" {
 		fmt.Printf("Password not specified, will create 14 character random password\n")
@@ -157,8 +170,8 @@ func main() {
 	err = json.Unmarshal(bodyText, &respdata)
 	Check(err, "Error unmarshalling first call for token")
 
-	fmt.Printf("confirmation: %s\n", respdata.Ok)
-	fmt.Printf("confirm account: %s\n", respdata.User)
+	fmt.Printf("Confirmation (should be OK): %s\n", respdata.Ok)
+	fmt.Printf("Confirm account: %s\n", respdata.User)
 	err = ioutil.WriteFile(acctfile, reqbytes.Bytes(), 0644)
 	Check(err, "Error writing account file")
 
