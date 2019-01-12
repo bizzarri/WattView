@@ -1,0 +1,11 @@
+cd emissions
+go install
+cd ../gridregion
+go install
+cd ../griddata
+go install
+cd ../makeacct
+go install
+cd ../passrecover
+go install
+

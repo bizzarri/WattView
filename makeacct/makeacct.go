@@ -19,15 +19,15 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"io/ioutil"
-	"os"
-	"encoding/json"
-	"time"
-	"flag"
 	"bytes"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io/ioutil"
 	"math/rand"
+	"net/http"
+	"os"
+	"time"
 )
 
 func init() {
@@ -37,24 +37,22 @@ func init() {
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!"
 
 func RandStringBytesRmndr(n int) string {
-	b := make([]byte,n)
+	b := make([]byte, n)
 	for i := range b {
 		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
 	}
 	return string(b)
 }
 
-
 type Wtoken struct {
-     token string `json:"token"`
-
+	token string `json:"token"`
 }
 
 type Response struct {
-	Ok string `json:"ok"`
+	Ok   string `json:"ok"`
 	User string `json:"user"`
 }
-	
+
 type MakeAcct struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -62,9 +60,9 @@ type MakeAcct struct {
 	Org      string `json:"org"`
 }
 
-func Check(val error, explain string)  {
+func Check(val error, explain string) {
 	if val != nil {
-		fmt.Printf("Error: %s\n%v\n",explain,val)
+		fmt.Printf("Error: %s\n%v\n", explain, val)
 		os.Exit(-1)
 	}
 }
@@ -82,14 +80,14 @@ func main() {
 	version := 0.0
 	homedir := os.Getenv("HOME")
 	wattdir := homedir + "/.WattTime"
-        acctfile := wattdir + "/account"
+	acctfile := wattdir + "/account"
 	//
 	// create directory if not created
 	//
 	os.MkdirAll(wattdir, os.ModePerm)
-        
+
 	//
-        // account (a) - account name to create
+	// account (a) - account name to create
 	// password (p)  - (optional) password to use, else a 14 letter/number
 	//          password will be created for you
 	// email (e) - email to use as recovery email account
@@ -98,10 +96,10 @@ func main() {
 	//
 	var account string
 	var password string
-        var email string
+	var email string
 	var org string
 	boolPtr := flag.Bool("debug", false, "Debug flag")
-	flag.StringVar(&account, "a","default","Account name to create")
+	flag.StringVar(&account, "a", "default", "Account name to create")
 	flag.StringVar(&password, "p", "", "Password to use")
 	flag.StringVar(&email, "e", "", "Email to use")
 	flag.StringVar(&org, "o", "", "(optional) organization name")
@@ -113,21 +111,21 @@ func main() {
 		fmt.Printf("Version: %1.2f\n", version)
 	}
 
-	fmt.Printf("WattTime Account Creation - create account: %s\n",account)
+	fmt.Printf("WattTime Account Creation - create account: %s\n", account)
 	if password == "" {
 		fmt.Printf("Password not specified, will create 14 character random password\n")
 
-                password = RandStringBytesRmndr(14)
-		fmt.Printf("password: %s\n",password)
+		password = RandStringBytesRmndr(14)
+		fmt.Printf("password: %s\n", password)
 	}
 
-     timeout := time.Duration(5 * time.Second)
-     client := &http.Client{
-     	    Timeout: timeout,
-	    }
-        var regvals MakeAcct
+	timeout := time.Duration(5 * time.Second)
+	client := &http.Client{
+		Timeout: timeout,
+	}
+	var regvals MakeAcct
 	regvals.Username = account
-	regvals.Password  = password
+	regvals.Password = password
 	regvals.Email = email
 	regvals.Org = org
 	//
@@ -135,36 +133,33 @@ func main() {
 	//
 	reqbytes := new(bytes.Buffer)
 	json.NewEncoder(reqbytes).Encode(regvals)
-        req, err := http.NewRequest("POST","https://api2.watttime.org/v2/register",bytes.NewBuffer(reqbytes.Bytes()))
-	req.Header.Set("Content-Type","application/json")
+	req, err := http.NewRequest("POST", "https://api2.watttime.org/v2/register", bytes.NewBuffer(reqbytes.Bytes()))
+	req.Header.Set("Content-Type", "application/json")
 	//
 	// don't actually do anything if debugging for the moment
 	//
-        var bodyText []byte
-        if !debug {
-	resp,err := client.Do(req)
-	Check (err,"Error Account request call")
-        defer resp.Body.Close()
-        bodyText, err = ioutil.ReadAll(resp.Body)
-	Check (err,"Error reading returned json")
+	var bodyText []byte
+	if !debug {
+		resp, err := client.Do(req)
+		Check(err, "Error Account request call")
+		defer resp.Body.Close()
+		bodyText, err = ioutil.ReadAll(resp.Body)
+		Check(err, "Error reading returned json")
 	} else {
-                m := Response{"User Created!", account}
-                bodyText, err = json.Marshal(m)
-                Check(err,"Error marshalling")
+		m := Response{"User Created!", account}
+		bodyText, err = json.Marshal(m)
+		Check(err, "Error marshalling")
 
-	   fmt.Printf("returned body: %s\n",bodyText)
+		fmt.Printf("returned body: %s\n", bodyText)
 	}
 
+	var respdata Response
+	err = json.Unmarshal(bodyText, &respdata)
+	Check(err, "Error unmarshalling first call for token")
 
-     var respdata Response
-     err = json.Unmarshal(bodyText,&respdata)
-	Check (err,"Error unmarshalling first call for token")
-
-        fmt.Printf("confirmation: %s\n",respdata.Ok)
-     	fmt.Printf("confirm account: %s\n",respdata.User)
-        err = ioutil.WriteFile(acctfile, reqbytes.Bytes(),0644)
-        Check (err, "Error writing account file")
-
-
+	fmt.Printf("confirmation: %s\n", respdata.Ok)
+	fmt.Printf("confirm account: %s\n", respdata.User)
+	err = ioutil.WriteFile(acctfile, reqbytes.Bytes(), 0644)
+	Check(err, "Error writing account file")
 
 }
