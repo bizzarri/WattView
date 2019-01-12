@@ -1,14 +1,15 @@
 <html>
   <h1>WattTime</h1>
 <h2>Summary</h2>
-These Go stand-alone programs create a simple command line interface for the WattTime system to read real-time and historic electric power grid information on the USA (and eventually European) Grids.<br />
+WattTime - a collection of command line routines for the WattTime system to read real-time and historic electric power grid information on the USA (and eventually European) Grids.<br /><br />
 Written by Maurice Bizzarri, Bizzarri Software, January 2019<br />
-see https://watttime.org for more information on this system<br />
+See https://watttime.org for more information on this system<br />
   <h2>Getting Started</h2>
-  Just clone the files and compile the go routines with go install <br />
+  Just clone the files and compile the go routines with go install.  There is also a script called INSTALL that can be run after cloneing <br />
   <h2>Prerequisites</h2>
   A working GO environment.  No fancy features used so older GO installs should work.<br />
-  
+  <h2>Documentation on the routines</h2>
+All routines support the -h flag to document the parameters<br />
 <p>
 emissions - get the emissions status for a Balancing Authority<br />
 griddata - get the detailed grid data for a specific BA over a specific time period.  This may be restricted according to the type of account you have.<br />
