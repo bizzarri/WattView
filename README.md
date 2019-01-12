@@ -5,7 +5,7 @@ WattTime - a collection of command line routines for the WattTime system to read
 Written by Maurice Bizzarri, Bizzarri Software, January 2019<br />
 See https://watttime.org for more information on this system<br />
   <h2>Getting Started</h2>
-  Just clone the files and compile the go routines with go install.  There is also a script called INSTALL that can be run after cloneing <br />
+  Just clone the files and compile the go routines with go install.  There is also a script called INSTALL that can be run after cloning <br />
   <h2>Prerequisites</h2>
   A working GO environment.  No fancy features used so older GO installs should work.<br />
   <h2>Documentation on the routines</h2>
