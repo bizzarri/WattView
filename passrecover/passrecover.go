@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
+
 )
 
 type Wtoken struct {
@@ -36,8 +36,8 @@ type Datadef struct {
 
 func Check(err error, msg string) {
 	if err != nil {
-		fmt.Printf("Error: %s\n%v\n", msg, err)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Error: %s\n%v\n", msg, err))
+
 	}
 }
 func main() {
@@ -58,8 +58,8 @@ func main() {
 	}
 
         if account == "default" {
-		fmt.Printf("Please specify account to recover using -a\n")
-		os.Exit(-1)
+		panic(fmt.Sprintf("Please specify account to recover using -a\n"))
+
 	}
 	fmt.Printf("Recover password for account: %s\n", account)
 	client := &http.Client{}
@@ -72,8 +72,8 @@ func main() {
 	Check(err, "Error GET Request")
         if resp.StatusCode != 200 {
 		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-		fmt.Printf("Status Error: %s\n",resp.Status)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+
 	}
 
 	response, err := ioutil.ReadAll(resp.Body)

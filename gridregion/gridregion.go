@@ -48,8 +48,8 @@ type Datadef struct {
 
 func Check(err error, msg string) {
 	if err != nil {
-		fmt.Printf("Error: %s\n%v\n", msg, err)
-		os.Exit(-1)
+		fmt.Sprintf("Error: %s\n%v\n", msg, err)
+
 	}
 }
 func main() {
@@ -111,8 +111,8 @@ func main() {
 	defer resp.Body.Close()
         if resp.StatusCode != 200 {
 		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-		fmt.Printf("Status Error: %s\n",resp.Status)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+
 	}
 
 	bodyText, err := ioutil.ReadAll(resp.Body)
@@ -143,8 +143,8 @@ func main() {
 	defer resp.Body.Close()
         if resp.StatusCode != 200 {
 		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-		fmt.Printf("Status Error: %s\n",resp.Status)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+
 	}
 
 	Check(err, "Error retrieving data")

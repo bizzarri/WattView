@@ -54,8 +54,9 @@ type Response struct {
 
 func Check(val error, explain string) {
 	if val != nil {
-		fmt.Printf("Error: %s\n%v\n", explain, val)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Error: %s\n%v\n", explain, val))
+
+
 	}
 }
 
@@ -149,8 +150,8 @@ func main() {
 	defer resp.Body.Close()
         if resp.StatusCode != 200 {
 		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-		fmt.Printf("Status Error: %s\n",resp.Status)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+
 	}
 
 	bodyText, err := ioutil.ReadAll(resp.Body)
@@ -175,8 +176,8 @@ func main() {
 	Check(err, "Error getting NewRequest")
         if resp.StatusCode != 200 {
 		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-		fmt.Printf("Status Error: %s\n",resp.Status)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+
 	}
 
 	response, err := ioutil.ReadAll(resp.Body)

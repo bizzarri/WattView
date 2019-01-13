@@ -71,8 +71,8 @@ type MakeAcct struct {
 
 func Check(val error, explain string) {
 	if val != nil {
-		fmt.Printf("Error: %s\n%v\n", explain, val)
-		os.Exit(-1)
+		panic(fmt.Sprintf("Error: %s\n%v\n", explain, val))
+
 	}
 }
 
@@ -121,8 +121,8 @@ func main() {
 	}
 
         if account == "default" {
-		fmt.Printf("Please specify account and email - see -h for help\n")
-		os.Exit(-1)
+		panic(fmt.Sprintf("Please specify account and email - see -h for help\n"))
+
 	}
 	fmt.Printf("WattTime Account Creation - create account: %s\n", account)
 	if password == "" {
@@ -158,8 +158,8 @@ func main() {
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
 			fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-			fmt.Printf("Status Error: %s\n",resp.Status)
-			os.Exit(-1)
+			panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+
 		}
 
 		bodyText, err = ioutil.ReadAll(resp.Body)
@@ -176,7 +176,7 @@ func main() {
 	err = json.Unmarshal(bodyText, &respdata)
 	Check(err, "Error unmarshalling first call for token")
 
-	fmt.Printf("Confirmation (should be OK): %s\n", respdata.Ok)
+	fmt.Printf("Confirmation (should be User Created): %s\n", respdata.Ok)
 	fmt.Printf("Confirm account: %s\n", respdata.User)
 	err = ioutil.WriteFile(acctfile, reqbytes.Bytes(), 0644)
 	Check(err, "Error writing account file")
