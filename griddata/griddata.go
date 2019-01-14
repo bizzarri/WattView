@@ -5,12 +5,18 @@
 //*
 //* Version 0.0 - initial functionaility
 //*
-//* takes two to 4 arguments on command line:
+//* takes multiple arguments on command line
+//* boolean flags (either there or not)
 //* -debug  displays debug information
+//* -csv sets comma separated values for file write format
+//* args that take args
 //* -l location uses that location to get info
 //* -a account to use
 //* -p password for account
-//* defaults to CAISO_ZP26
+//* -f filename - no display, writes to file.  Defaults to JSON format
+//*               can be set to CSV format by csv flag
+//*
+//* defaults to CAISO_ZP26 location (Balancing authority)
 //* uses $HOME/.WattTime/account if account not specified
 //*
 //* if $HOME/.WattTime/ba there uses the file unless
@@ -26,6 +32,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+        "io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -71,15 +78,20 @@ func main() {
 	var endtime string
         var account string
 	var password string
+        var filename string
 	boolPtr := flag.Bool("debug", false, "Debug flag")
+	boolPtr2 := flag.Bool("csv", false, ".csv file format flag")
+
+	flag.StringVar(&filename, "f", "", "File name to write data to")
 	flag.StringVar(&location, "l", "nothing", "Balancing Authority abbrev.")
 	flag.StringVar(&starttime, "s", "2019-01-02T00:00:00", "Start Time (RFC3339 format")
 	flag.StringVar(&endtime, "e", "2019-01-02T00:00:05", "End Time (RFC3339 format)")
-        flag.StringVar(&account,"a","nothing","Account Name")
-	flag.StringVar(&password,"p","nothing","Account password")
+        flag.StringVar(&account,"a","","Account Name")
+	flag.StringVar(&password,"p","","Account password")
 
 	flag.Parse()
 	debug := *boolPtr
+        csvflag := *boolPtr2
 	if debug {
 		fmt.Printf("Debug flag true - in debug mode.\n")
 		fmt.Printf("Version: %1.2f\n", version)
@@ -92,7 +104,7 @@ func main() {
 	homedir := os.Getenv("HOME")
 	acctfile := homedir + "/.WattTime/account"
 	bafile := homedir + "/.WattTime/ba"
-	if account == "nothing" {
+	if account == "" {
 		accts, err := ioutil.ReadFile(acctfile)
 		Check(err, "Accounts file not found or other read error")
 		var macct MakeAcct
@@ -179,12 +191,45 @@ func main() {
 	if debug {
 		fmt.Printf("Response: %s\n", response)
 	}
-
+        if filename != "" && !csvflag {
+		err = ioutil.WriteFile(filename,response,0644)
+		Check(err,"Error writing data file")
+		fmt.Printf("JSON format file %s written\n",filename)
+		os.Exit(0)
+	}
 	var unwrap []Datadef
 	err = json.Unmarshal(response, &unwrap)
 	Check(err, "Error unmarshalling response")
-	//
-	//        for idx := 0; idx < 5; idx++ {
+        if filename != "" && csvflag {
+		csvi, err := os.OpenFile(filename,os.O_RDWR |os.O_CREATE,0644)
+		Check(err,"Error opening CSV file")
+		io.WriteString(csvi,fmt.Sprintf("Balancing_Authority,"))
+		io.WriteString(csvi,fmt.Sprintf("Data_Type,"))
+		io.WriteString(csvi,fmt.Sprintf("Time_Stamp,"))
+		io.WriteString(csvi,fmt.Sprintf("Frequency,"))
+		io.WriteString(csvi,fmt.Sprintf("Value,"))
+		io.WriteString(csvi,fmt.Sprintf("Market,"))
+		io.WriteString(csvi,fmt.Sprintf("Fuel\n"))
+	
+	for idx := range unwrap {
+		io.WriteString(csvi,fmt.Sprintf("%s,", unwrap[idx].Ba))
+		io.WriteString(csvi,fmt.Sprintf("%s,", unwrap[idx].Dtype))
+		io.WriteString(csvi,fmt.Sprintf("%s,", unwrap[idx].Point_time))
+		io.WriteString(csvi,fmt.Sprintf("%f,", unwrap[idx].Frequency))
+		io.WriteString(csvi,fmt.Sprintf("%f,", unwrap[idx].Val))
+		io.WriteString(csvi,fmt.Sprintf("%s,", unwrap[idx].Market))
+		io.WriteString(csvi,fmt.Sprintf("%s\n", unwrap[idx].Fuel))
+	
+	}
+                err = csvi.Close()
+		Check(err,"Error closing CSV file")
+		fmt.Printf("File %s written in CSV format\n\n",filename)
+		os.Exit(0)
+	}
+	//*
+	//* display on screen
+	//*
+	
 	for idx := range unwrap {
 		fmt.Printf("Balancing Authority: %s\n", unwrap[idx].Ba)
 		fmt.Printf("Data Type: %s\n", unwrap[idx].Dtype)
