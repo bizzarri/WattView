@@ -56,7 +56,6 @@ func Check(val error, explain string) {
 	if val != nil {
 		panic(fmt.Sprintf("Error: %s\n%v\n", explain, val))
 
-
 	}
 }
 
@@ -73,15 +72,17 @@ func main() {
 	// debug - debug flag
 	//
 	var loc string
-        var account string
+	var account string
 	var password string
 	boolPtr := flag.Bool("debug", false, "Debug flag")
-	flag.StringVar(&loc, "l", "nothing", "Balancing Authority")
-	flag.StringVar(&account, "a", "nothing", "Account to use")
-	flag.StringVar(&password, "p", "nothing", "Account Password")
-	
+	boolPtr2 := flag.Bool("q", false, "Quiet flag")
+	flag.StringVar(&loc, "l", "", "Balancing Authority")
+	flag.StringVar(&account, "a", "", "Account to use")
+	flag.StringVar(&password, "p", "", "Account Password")
+
 	flag.Parse()
 	debug := *boolPtr
+	quiet := *boolPtr2
 	if debug {
 		fmt.Printf("Debug flag true - in debug mode.\n")
 		fmt.Printf("Version: %1.2f\n", version)
@@ -97,11 +98,11 @@ func main() {
 	//
 	// see if ba file created
 	// command line takes precedent.
-	// if loc is not "nothing" then check file
+	// if loc is not "g" then check file
 	// if file isn't there then default to defaultloc
 	//
 	var locate string
-	if loc != "nothing" {
+	if loc != "" {
 		locate = loc
 	} else {
 		blocate, err := ioutil.ReadFile(bafile)
@@ -120,7 +121,7 @@ func main() {
 	//* if account not specified in command line, look in
 	//* account file in $HOME/.WattTime/account
 	//*
-        if account == "nothing" {
+	if account == "" {
 		accts, err := ioutil.ReadFile(acctfile)
 		Check(err, "Accounts file not found or other read error")
 		var macct MakeAcct
@@ -129,12 +130,21 @@ func main() {
 		account = macct.Username
 		password = macct.Password
 	}
+	//*
+	//* sanity check
+	//*
+	if account == "" || password == "" {
+		fmt.Printf("Error: account and password must be specified.\n")
+		os.Exit(-1)
+	}
 
 	if debug {
 		fmt.Printf("Account Name: %s\n", account)
 		fmt.Printf("Password: %s\n", password)
 	}
-	fmt.Printf("WattTime Emissions Real Time Analysis\n")
+	if !quiet {
+		fmt.Printf("WattTime Emissions Real Time Analysis for %s\n\n", locate)
+	}
 	//
 	// had to increase time out
 	//
@@ -148,9 +158,9 @@ func main() {
 	Check(err, "Error login request call")
 
 	defer resp.Body.Close()
-        if resp.StatusCode != 200 {
-		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-		panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+	if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n", resp.StatusCode)
+		panic(fmt.Sprintf("Status Error: %s\n", resp.Status))
 
 	}
 
@@ -174,9 +184,9 @@ func main() {
 	req.Header.Add("Authorization", bearer)
 	resp, err = client.Do(req)
 	Check(err, "Error getting NewRequest")
-        if resp.StatusCode != 200 {
-		fmt.Printf("Error: Status Code: %d\n",resp.StatusCode)
-		panic(fmt.Sprintf("Status Error: %s\n",resp.Status))
+	if resp.StatusCode != 200 {
+		fmt.Printf("Error: Status Code: %d\n", resp.StatusCode)
+		panic(fmt.Sprintf("Status Error: %s\n", resp.Status))
 
 	}
 
@@ -191,16 +201,26 @@ func main() {
 	var emisres Response
 	err = json.Unmarshal(response, &emisres)
 	Check(err, "Error unmarshalling response")
-	fmt.Printf("\nReport for balancing authority: %s\n", emisres.Barea)
-	if emisres.Green == "0" {
-		fmt.Printf("Don't switch (not green)\n")
-	} else {
-		fmt.Printf("Switch! (green grid)\n")
-	}
+	if !quiet {
+		if emisres.Green == "0" {
+			fmt.Printf("Don't switch (not green)\n")
+		} else {
+			fmt.Printf("Switch! (green grid)\n")
+		}
 
-	timed, err := time.Parse(time.RFC3339, emisres.Validuntil)
-	Check(err, "Error parsing Valid Until time")
-	fmt.Printf("Valid Until: %02d:%02d:%02d UT\n", timed.Hour(), timed.Minute(), timed.Second())
-	fmt.Printf("Rating (0=Extremely Clean, 5=Harmful): %s\n", emisres.Rating)
-	fmt.Printf("Percent Dirty (0-100): %s\n", emisres.Percent)
+		timed, err := time.Parse(time.RFC3339, emisres.Validuntil)
+		Check(err, "Error parsing Valid Until time")
+		fmt.Printf("Valid Until: %02d:%02d:%02d UT\n", timed.Hour(), timed.Minute(), timed.Second())
+		fmt.Printf("Rating (0=Extremely Clean, 5=Harmful): %s\n", emisres.Rating)
+		fmt.Printf("Percent Dirty (0-100): %s\n", emisres.Percent)
+	}
+	//*
+	//* set return
+	//* return 0 if green is good, else return 1
+	//*
+	if emisres.Green == "1" {
+		os.Exit(0)
+	} else {
+		os.Exit(1)
+	}
 }

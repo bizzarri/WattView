@@ -83,7 +83,7 @@ func main() {
 	boolPtr2 := flag.Bool("csv", false, ".csv file format flag")
 
 	flag.StringVar(&filename, "f", "", "File name to write data to")
-	flag.StringVar(&location, "l", "nothing", "Balancing Authority abbrev.")
+	flag.StringVar(&location, "l", "", "Balancing Authority abbrev.")
 	flag.StringVar(&starttime, "s", "2019-01-02T00:00:00", "Start Time (RFC3339 format")
 	flag.StringVar(&endtime, "e", "2019-01-02T00:00:05", "End Time (RFC3339 format)")
         flag.StringVar(&account,"a","","Account Name")
@@ -149,7 +149,7 @@ func main() {
 	// if file isn't there then default to defaultloc
 	//
 	var locate string
-	if location != "nothing" {
+	if location != "" {
 		locate = location
 	} else {
 		blocate, err := ioutil.ReadFile(bafile)
