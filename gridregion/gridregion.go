@@ -65,8 +65,8 @@ func main() {
 	boolPtr := flag.Bool("debug", false, "Debug flag")
         var account string
 	var password string
-        flag.StringVar(&account, "a","nothing","Account Name")
-	flag.StringVar(&password,"p","nothing","Account Password")
+        flag.StringVar(&account, "a","","Account Name")
+	flag.StringVar(&password,"p","","Account Password")
 
 	flag.Float64Var(&lat, "lat", 42.372, "Latitude to use")
 	flag.Float64Var(&long, "long", -72.519, "Longitude to use")
@@ -87,7 +87,7 @@ func main() {
 	// get account and password from $HOME/.WattTime/account
 	// should be set by makeacct
 	//
-        if account == "nothing" {
+        if account == "" {
 		accts, err := ioutil.ReadFile(acctfile)
 		Check(err, "Accounts file not found or other read error")
 		var macct MakeAcct
@@ -97,12 +97,17 @@ func main() {
 		password = macct.Password
 	}
 	
+        if account == "" || password == "" {
+		fmt.Printf("Error: account and password must be specified.\n")
+		os.Exit(-1)
+	}
+	
 	if debug {
 		fmt.Printf("Account Name: %s\n", account)
 		fmt.Printf("Password: %s\n", password)
 	}
 
-	fmt.Printf("Grid Region Name for Latitude/Longitude: %f, %f\n", lat, long)
+	fmt.Printf("Grid Region Name for Latitude/Longitude: %f, %f\n\n", lat, long)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://api2.watttime.org/v2/login", nil)
 	req.SetBasicAuth(account, password)
