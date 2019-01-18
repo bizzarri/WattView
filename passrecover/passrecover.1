@@ -1,0 +1,47 @@
+.TH passrecover 1 "January 15, 2019" "Version 0.0" "passrecover for WattTime.org API"
+.SH NAME
+passrecover - recover password for WattTime API
+.SH SYNOPSIS
+passrecover
+.OP \-h
+.OP \-debug
+.OP \-a account
+.YS
+.SH DESCRIPTION
+.B passrecover
+is a command line function to recover a password from a WattTime API account.
+This command will cause the WattTime API to send an email to the email account
+used when the account was set up.  The email will contain a link to be used to reset the account.
+.PP
+.UR https://\:WattTime.org
+WattTime home page
+.UE
+.SH OPTIONS
+.IP -a
+Account name to use
+.IP -h
+List help for all parameters
+.IP -debug
+Go into debug mode and display debug and trace information
+.SH EXAMPLES
+Recover password for account named testacct
+.PP
+.nf
+.RS
+.ft B
+passrecover -a testacct
+.sp
+.RE
+.fi
+.PP
+.PP
+.SH BUGS
+None known - but this is version 0.0
+.SH AUTHOR
+.MT maurice@\:bizzarrisoftware.com
+Maurice Bizzarri
+.ME
+.SH SEE ALSO
+emissions, gridregion, makeacct, griddata
+
+

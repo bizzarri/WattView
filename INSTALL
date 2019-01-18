@@ -1,11 +1,31 @@
+gzip -k wattview.1
+cp wattview.1.gz /usr/local/share/man/man1
 cd emissions
-go install
+go build
+cp emissions /usr/local/bin
+gzip -k emissions.1 
+cp emissions.1.gz /usr/local/share/man/man1
 cd ../gridregion
-go install
+go build
+cp gridregion /usr/local/bin
+gzip -k gridregion.1
+cp gridregion.1.gz /usr/local/share/man/man1
 cd ../griddata
-go install
+go build
+cp griddata  /usr/local/bin
+gzip -k griddata.1
+cp griddata.1.gz /usr/local/share/man/man1
 cd ../makeacct
-go install
+go build
+cp makeacct /usr/local/bin
+gzip -k makeacct.1
+cp makeacct.1.gz /usr/local/share/man/man1
 cd ../passrecover
-go install
+go build
+cp passrecover /usr/local/bin
+gzip -k passrecover.1
+cp passrecover.1.gz /usr/local/share/man/man1
+
+
+
 

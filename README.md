@@ -1,5 +1,5 @@
 <html>
-  <h1>WattTime</h1>
+  <h1>WattView</h1>
 <h2>Summary</h2>
 WattTime - a collection of Go language command line routines written on the Raspberry Pi for the WattTime (watttime.org) API to read real-time and historic electric power grid information on the USA (and eventually European) Grids.<br /><br />
 Written by Maurice Bizzarri, Bizzarri Software, January 2019<br />

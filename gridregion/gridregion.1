@@ -1,0 +1,63 @@
+.TH gridregion 1 "January 15, 2019" "Version 0.0" "gridregion for WattTime.org API"
+.SH NAME
+gridregion - for a specific latitude/longitude, return the Balancing Authority (BA)
+.SH SYNOPSIS
+gridregion
+.OP \-h
+.OP \-debug
+.OP \-a account
+.OP \-p password
+.OP \-long longitude
+.OP \-lat latitude
+.YS
+.SH DESCRIPTION
+.B gridregion
+is a command line function to return the Balancing Authority for a given latitude and longitude.  The BA is displayed and written to $HOME/.WattTime/ba where it can be used by other functions
+.PP
+.UR https://\:WattTime.org
+WattTime home page
+.UE
+.SH FILES
+.I $HOME/.WattTime/account
+.RS
+Configuration Files
+.RE
+.I $HOME/.WattTime/ba
+.RS
+Balancing Authority to write
+.RE
+.SH OPTIONS
+.IP -a
+Account name to use
+.IP -p
+Password for account
+.IP -lat
+Latitude to use (floating point)
+.IP -long
+Longitude to use (floating point)
+.IP -h
+List help for all parameters
+.IP -debug
+Go into debug mode and display debug and trace information
+.SH EXAMPLES
+Get the balancing authority (BA) of a specifc longitude/latitude pair
+.PP
+.nf
+.RS
+.ft B
+gridregion -lat 42.372 -long -72.519
+.sp
+.RE
+.fi
+.PP
+.PP
+.SH BUGS
+None known - but this is version 0.0
+.SH AUTHOR
+.MT maurice@\:bizzarrisoftware.com
+Maurice Bizzarri
+.ME
+.SH SEE ALSO
+emissions, gridregion, makeacct, passrecover
+
+

@@ -1,0 +1,72 @@
+.TH griddata 1 "January 15, 2019" "Version 0.0" "griddata for WattTime.org API"
+.SH NAME
+griddata - Extract historical grid data using the WattTime.org API
+
+.SH SYNOPSIS
+griddata
+.OP \-h
+.OP \-debug
+.OP \-csv
+.OP \-l location
+.OP \-a account
+.OP \-f filename
+.OP \-p password
+.OP \-s Start_Time
+.OP \-e End_Time
+.YS
+.SH DESCRIPTION
+.B gridddata
+is a command line function to extract historical data from the WattTime.org API.
+Data may be displayed on screen or written to file in JSON or CSV (comma separated value) format
+.PP
+.UR https://\:WattTime.org
+WattTime home page
+.UE
+.SH FILES
+.I $HOME/.WattTime/account
+.RS
+Configuration Files
+.RE
+.I $HOME/.WattTime/ba
+.RS
+Balancing Authority to use as default
+.RE
+.SH OPTIONS
+.IP -a
+Account name to use
+.IP -p
+Password for account
+.IP -s
+Start Time for data retrieval
+.IP -e
+End Time for data retrieval
+.IP -f
+Filename to write data to - suppresses display on screen
+.IP -h
+List help for all parameters
+.IP -debug
+Go into debug mode and display debug and trace information
+.IP -csv
+Writes file in CSV format (comma separated values)
+.SH EXAMPLES
+display grid data from a specific balancing authority
+.PP
+.nf
+.RS
+.ft B
+griddata -l CAISO_NP15 -a accountname -p password
+.sp
+.RE
+.fi
+.PP
+.PP
+.SH BUGS
+None known - but this is version 0.0
+.SH AUTHOR
+.MT maurice@\:bizzarrisoftware.com
+Maurice Bizzarri
+.ME
+.SH SEE ALSO
+emissions, gridregion, makeacct, passrecover
+
+

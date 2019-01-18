@@ -1,0 +1,60 @@
+.TH makeacct 1 "January 15, 2019" "Version 0.0" "makeacct for WattTime.org API"
+.SH NAME
+makeacct - make an account on WattTime to access their API
+.SH SYNOPSIS
+makeacct
+.OP \-h
+.OP \-debug
+.OP \-a account
+.OP \-p password
+.OP \-o organization
+.OP \-e email
+.YS
+.SH DESCRIPTION
+.B makeacct
+is a function to create accounts on the WattTime.org API system.  The information is then written to $HOME/.WattTime/account in JSON format for the other routines in this library
+.PP
+.UR https://\:WattTime.org
+WattTime home page
+.UE
+.SH FILES
+.I $HOME/.WattTime/account
+.RS
+Configuration Files
+.RE
+.SH OPTIONS
+.IP -a
+Account name to use
+.IP -p
+Password for account
+.IP -e
+Email account for recovery in case of forgotten password
+.IP -o
+Organization name (optional)
+.IP -h
+List help for all parameters
+.IP -debug
+Go into debug mode and display debug and trace information
+.SH EXAMPLES
+Make an account on the WattTime.org API system
+.PP
+.nf
+.RS
+.ft B
+makeacct -a newacct -p password -e email@example.com -o BigCompany
+.sp
+.RE
+.fi
+.PP
+.PP
+.SH BUGS
+None known - but this is version 0.0
+.SH AUTHOR
+.MT maurice@\:bizzarrisoftware.com
+Maurice Bizzarri
+.ME
+.SH SEE ALSO
+emissions, gridregion, passrecover
+
+
+

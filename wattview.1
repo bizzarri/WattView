@@ -1,0 +1,42 @@
+.TH WattView 1 "January 15, 2019" "Version 0.0" "WattView package for WattTime.org API"
+.SH NAME
+.B WattView
+- a package of functions to use the WattTime.org API to retrieve, display and save current and/or historical electrical grid data.  Each function also has it's own man page.
+.SH DESCRIPTION
+.B emissions
+displays real time green grid data from the WattTime.org API.
+.PP
+.B griddata
+displays or saves historical grid data in JSON or CSV format
+.PP
+.B gridregion
+display and saves the balancing authority (BA) for a given set of longitude/latitude
+.PP
+.B makeacct
+makes an account on the WattTime.org API system and saves the information locally for use by other functions in this system
+.PP
+.B passrecover
+recovers a password lost on WattTime.org.  Uses the email address given to makeacct
+.PP
+.B WattTime Home Page
+.UR https://\:WattTime.org
+.UE
+.SH FILES
+.I $HOME/.WattTime/account
+.RS
+Configuration File containing account name, password, email, and org
+.RE
+.I $HOME/.WattTime/ba
+.RS
+Balancing Authority to use as default.  Written by gridregion.
+.RE
+.SH BUGS
+None known - but this is version 0.0
+.SH AUTHOR
+.MT maurice@\:bizzarrisoftware.com
+Maurice Bizzarri
+.ME
+.SH SEE ALSO
+griddata, gridregion, makeacct, passrecover, emissions
+
+
