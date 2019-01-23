@@ -3,3 +3,4 @@
 test.*
 test
 proto.*
+*.gz

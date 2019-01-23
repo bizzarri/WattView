@@ -1,3 +1,4 @@
+mkdir /usr/local/share/man/man1
 gzip -k wattview.1
 cp wattview.1.gz /usr/local/share/man/man1
 cd emissions
