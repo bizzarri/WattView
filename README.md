@@ -35,7 +35,7 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 $HOME/.WattTime/account<br />
 Contains information on account - written by makeacct<br />
 Example File: <br />
-{"username":"account-name","password":"account-password","email":"email address","org":"organization name"}<br />
+{"username":"account-name","password":"account-password","email":"email address","org":"organization name"}<br /><br />
 $HOME/.WattTime/ba<br />
 Contains location searched for in gridregion.  Will be used by griddata and emissions. Can be overridden by using command line arguments.<br />
 Example File:<br />
